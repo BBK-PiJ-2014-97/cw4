@@ -18,7 +18,7 @@ public class ContactImpl implements Contact {
 	 */
 	
 	public ContactImpl(String name, String notes) {
-		this.id = ContactImpl.globalId++;
+		this.setId(this.generateId());
 		this.name = name;
 		this.notes = notes;
 	}
@@ -28,7 +28,15 @@ public class ContactImpl implements Contact {
 		return this.id;
 	}
 	
-
+	/**
+	 * We are using static id increments for our unique ids
+	 * @return
+	 */
+	public int generateId() {
+		int newId = ContactImpl.globalId++;
+		return newId;
+	}
+	
 	public void setId(int id) {
 		this.id = id;
 	}
