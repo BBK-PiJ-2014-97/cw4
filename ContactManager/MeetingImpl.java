@@ -8,10 +8,24 @@ import java.util.Set;
  */
 
 public class MeetingImpl implements Meeting {
-
+	private static int globalId;
+	private int id;
+	
+	public MeetingImpl() {
+		this.setId(this.generateId());
+	}
+	
 	public int getId() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.id;
+	}
+	
+	public int generateId() {
+		int newId = MeetingImpl.globalId++;
+		return newId;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public Calendar getDate() {
