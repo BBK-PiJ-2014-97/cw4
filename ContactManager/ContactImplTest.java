@@ -8,7 +8,7 @@ public class ContactImplTest {
 
 	@Test
 	public void testWeCanCreateNewContact() {
-		ContactImpl newContact = new ContactImpl("Mario", "");
+		ContactImpl newContact = new ContactImpl("Mario", ""); 
 		assertNotEquals(null, newContact);
 	}
 
