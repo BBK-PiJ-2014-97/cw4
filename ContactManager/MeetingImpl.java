@@ -11,6 +11,9 @@ public class MeetingImpl implements Meeting {
 	private static int globalId;
 	private int id;
 	
+	private Calendar date;
+	private Set<Contact> contacts;
+	
 	public MeetingImpl() {
 		this.setId(this.generateId());
 	}
@@ -28,14 +31,20 @@ public class MeetingImpl implements Meeting {
 		this.id = id;
 	}
 
+	public void setDate(Calendar date) {
+		this.date = date;
+	}
+	
 	public Calendar getDate() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.date;
 	}
 
+	public void setContacts(Set<Contact> contacts) {
+		this.contacts = contacts;
+	}
+	
 	public Set<Contact> getContacts() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.contacts;
 	}
 
 }
