@@ -2,17 +2,22 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 
+import com.thoughtworks.xstream.XStream;
+
 /**
  * 
  * @author Elmario Husha
  * Our ContactManager
  */
 
+@SuppressWarnings("null")
 public class ContactManagerImpl implements ContactManager{
-	private List<Meeting> meetings;
+	private List<PastMeetingImpl> pastMeetings;
+	private List<MeetingImpl> currentMeetings;
+	private List<FutureMeetingImpl> futureMeetings;
 	
 	public ContactManagerImpl() {
-		// On first startup load existing data
+		// TODO: load up older meetings from our XML
 	}
 	
 	public int addFutureMeeting(Set<Contact> contacts, Calendar date) {
@@ -20,33 +25,54 @@ public class ContactManagerImpl implements ContactManager{
 		newFutureMeeting.setContacts(contacts);
 		newFutureMeeting.setDate(date);
 		
-		this.meetings.add(newFutureMeeting);
+		this.futureMeetings.add(newFutureMeeting);
 		
 		return newFutureMeeting.getId();
 	}
 
 	public PastMeeting getPastMeeting(int id) {
-		// TODO Auto-generated method stub
+		for(PastMeetingImpl mt: this.pastMeetings) {
+			if(mt.getId() == id) {
+				return mt;
+			}
+		}
 		return null;
 	}
 
 	public FutureMeeting getFutureMeeting(int id) {
-		// TODO Auto-generated method stub
+		for(FutureMeetingImpl mt: this.futureMeetings) {
+			if(mt.getId() == id) {
+				return mt;
+			}
+		}
 		return null;
 	}
 
 	public Meeting getMeeting(int id) {
-		// TODO Auto-generated method stub
+		for(MeetingImpl mt: this.currentMeetings) {
+			if(mt.getId() == id) {
+				return mt;
+			}
+		}
 		return null;
 	}
-
+	
 	public List<Meeting> getFutureMeetingList(Contact contact) {
-		// TODO Auto-generated method stub
-		return null;
+		// Our temp List holding filtered meetings
+		List<Meeting> tempMeetings = null;
+		
+		for(FutureMeetingImpl mt: this.futureMeetings) {
+			for(Contact ct: mt.getContacts()) {
+				if(ct.equals(contact)) {
+					tempMeetings.add((Meeting) mt);
+				}
+			}
+		}
+		return tempMeetings;
 	}
 
 	public List<Meeting> getFutureMeetingList(Calendar date) {
-		// TODO Auto-generated method stub
+		// WAITING FOR CLARIFICATION FROM PROF DUE TO TYPOS
 		return null;
 	}
 
@@ -66,7 +92,7 @@ public class ContactManagerImpl implements ContactManager{
 		
 	}
 
-	public void addNewContact(String name, String notes) {
+	public void addNewContact(String name, String notes)  {
 		// TODO Auto-generated method stub
 		
 	}
@@ -77,13 +103,32 @@ public class ContactManagerImpl implements ContactManager{
 	}
 
 	public Set<Contact> getContacts(String name) {
-		// TODO Auto-generated method stub
+		//loop through each meeting List
+		// for each contact in list, check if we have a match
+		// and that it's not already in our temp set
 		return null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see ContactManager#flush()
+	 * File format:XML
+	 * <Calendar>
+	 * 		<Created>
+	 * 		<PastMeetings>
+	 * 		<CurrentMeetings>
+	 * 		<FutureMeetings>
+	 */
 	public void flush() {
 		// TODO Auto-generated method stub
+		XStream xstream = new XStream();
+		xstream.alias("PastMeeting", PastMeetingImpl.class);
+		xstream.alias("CurrentMeeting", MeetingImpl.class);
+		xstream.alias("FutureMeeting", FutureMeetingImpl.class);
 		
+		FlushSchema flushSchema = new FlushSchema();
+		
+		String xml = xstream.toXML(flushSchema);
 	}
 
 }
