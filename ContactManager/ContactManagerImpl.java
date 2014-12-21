@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -13,9 +14,9 @@ import com.thoughtworks.xstream.*;
  */
 
 public class ContactManagerImpl implements ContactManager{
-	private List<PastMeetingImpl> pastMeetings = new ArrayList<PastMeetingImpl>();;
-	private List<MeetingImpl> currentMeetings = new ArrayList<MeetingImpl>();;
-	private List<FutureMeetingImpl> futureMeetings = new ArrayList<FutureMeetingImpl>();;
+	private List<PastMeetingImpl> pastMeetings = new ArrayList<PastMeetingImpl>();
+	private List<MeetingImpl> currentMeetings = new ArrayList<MeetingImpl>();
+	private List<FutureMeetingImpl> futureMeetings = new ArrayList<FutureMeetingImpl>();
 	
 	public ContactManagerImpl() {
 		// TODO: load up meetings from our XML
@@ -62,11 +63,11 @@ public class ContactManagerImpl implements ContactManager{
 	}
 	public List<Meeting> getFutureMeetingList(Contact contact) {
 		// Our temp List holding filtered meetings
-		List<Meeting> tempMeetings = null;
+		List<Meeting> tempMeetings = new ArrayList<Meeting>();
 		
 		for(FutureMeetingImpl mt: this.futureMeetings) {
 			for(Contact ct: mt.getContacts()) {
-				if(ct.equals(contact)) {
+				if(ct.getName().equals(contact.getName())) {
 					tempMeetings.add((Meeting) mt);
 				}
 			}
@@ -103,11 +104,11 @@ public class ContactManagerImpl implements ContactManager{
 
 	public List<PastMeeting> getPastMeetingList(Contact contact) {
 		// Our temp List holding filtered meetings
-		List<PastMeeting> tempMeetings = null;
+		List<PastMeeting> tempMeetings = new ArrayList<PastMeeting>();
 		
 		for(PastMeetingImpl mt: this.pastMeetings) {
 			for(Contact ct: mt.getContacts()) {
-				if(ct.equals(contact)) {
+				if(ct.getName().equals(contact.getName())) {
 					tempMeetings.add((PastMeeting) mt);
 				}
 			}
@@ -125,8 +126,18 @@ public class ContactManagerImpl implements ContactManager{
 	}
 
 	public void addMeetingNotes(int id, String text) {
-		((PastMeetingImpl) this.getFutureMeeting(id)).setNotes(text);
-		((PastMeetingImpl) this.getPastMeeting(id)).setNotes(text);
+		PastMeetingImpl meeting = (PastMeetingImpl) this.getPastMeeting(id);
+		if(meeting != null) {
+			// Only if we found something we should bother updating notes
+			meeting.setNotes(text);
+		} else {
+			// Else lets try to find Future meeting and convert it to Past meeting
+			FutureMeetingImpl futureMeeting = (FutureMeetingImpl) this.getFutureMeeting(id);
+			if(futureMeeting != null) {
+				// we have a match, so lets copy it over
+				this.addNewPastMeeting(futureMeeting.getContacts(), futureMeeting.getDate(), text);
+			}
+		}
 	}
 
 	public void addNewContact(String name, String notes)  {
@@ -135,27 +146,30 @@ public class ContactManagerImpl implements ContactManager{
 	}
 
 	public Set<Contact> getContacts(int... ids) {
-		Set<Contact> contactsToReturn = null;
-		for(FutureMeetingImpl mt: this.futureMeetings) {
-			for(Contact ct: mt.getContacts()) {
-				if(Arrays.asList(ids).contains(ct.getId())) {
-					contactsToReturn.add(ct);
+		// We just need to loop through each idea, and then check each of our lists
+		Set<Contact> contactsToReturn = new HashSet<Contact>();
+		for(int i = 0; i < ids.length; i++){
+			for(FutureMeetingImpl mt: this.futureMeetings) {
+				for(Contact ct: mt.getContacts()) {
+					if(ct.getId() == ids[i]) {
+						contactsToReturn.add(ct);
+					}
 				}
 			}
-		}
-		
-		for(MeetingImpl mt: this.currentMeetings) {
-			for(Contact ct: mt.getContacts()) {
-				if(Arrays.asList(ids).contains(ct.getId())) {
-					contactsToReturn.add(ct);
+			
+			for(MeetingImpl mt: this.currentMeetings) {
+				for(Contact ct: mt.getContacts()) {
+					if(ct.getId() == ids[i]) {
+						contactsToReturn.add(ct);
+					}
 				}
 			}
-		}
-		
-		for(PastMeetingImpl mt: this.pastMeetings) {
-			for(Contact ct: mt.getContacts()) {
-				if(Arrays.asList(ids).contains(ct.getId())) {
-					contactsToReturn.add(ct);
+			
+			for(PastMeetingImpl mt: this.pastMeetings) {
+				for(Contact ct: mt.getContacts()) {
+					if(ct.getId() == ids[i]) {
+						contactsToReturn.add(ct);
+					}
 				}
 			}
 		}
@@ -163,7 +177,7 @@ public class ContactManagerImpl implements ContactManager{
 	}
 
 	public Set<Contact> getContacts(String name) {
-		Set<Contact> contactsToReturn = null;
+		Set<Contact> contactsToReturn = new HashSet<Contact>();
 		
 		for(FutureMeetingImpl mt: this.futureMeetings) {
 			for(Contact ct: mt.getContacts()) {
