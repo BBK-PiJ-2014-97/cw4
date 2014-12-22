@@ -1,5 +1,6 @@
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
@@ -155,6 +156,43 @@ public class ContactManagerImplTest {
 	
 	@Test
 	public void testCanFlushStateToFile() {
+		ContactManagerImpl myctm = new ContactManagerImpl();
+		
+		Set<Contact> testContacts = new HashSet<Contact>();
+		testContacts.add(new ContactImpl("Mario", "Bla"));
+		
+		Calendar calInstance = Calendar.getInstance();
+		
+		myctm.addNewPastMeeting(testContacts, calInstance, "Test Notes");
+		
+		Set<Contact> testContacts2 = new HashSet<Contact>();
+		testContacts2.add(new ContactImpl("George", "Bla"));
+		
+		Calendar calInstance2 = Calendar.getInstance();
+		
+		myctm.addNewPastMeeting(testContacts2, calInstance2, "Test Notes 2");
+		
+		Set<Contact> testContacts3 = new HashSet<Contact>();
+		testContacts3.add(new ContactImpl("Mike", "Bla"));
+		
+		Calendar calInstance3 = Calendar.getInstance();
+		
+		myctm.addNewPastMeeting(testContacts3, calInstance3, "Test Notes");
+		
+		Set<Contact> testContacts4 = new HashSet<Contact>();
+		testContacts4.add(new ContactImpl("John", "Bla"));
+		
+		Calendar.getInstance().add(Calendar.DAY_OF_MONTH, +25);
+		myctm.addFutureMeeting(testContacts4, Calendar.getInstance());
+		
+		myctm.flush();
+		
+		File testXmlExists = new File("contactManager.xml");
+		assertEquals(true, testXmlExists.exists());
+	}
+	
+	@Test
+	public void testCanLoadStateFromXMLFile() {
 		
 	}
 }

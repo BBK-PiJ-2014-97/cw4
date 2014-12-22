@@ -1,3 +1,7 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -6,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.thoughtworks.xstream.*;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 
 /**
  * 
@@ -79,7 +84,7 @@ public class ContactManagerImpl implements ContactManager{
 		// We must loop through all of the meetings and find those
 		// with the same date as our param
 		
-		List<Meeting> tempMeetings = null;
+		List<Meeting> tempMeetings = new ArrayList<Meeting>();
 
 		for(FutureMeetingImpl mt: this.futureMeetings) {
 			if(mt.getDate().equals(date)) {
@@ -217,15 +222,30 @@ public class ContactManagerImpl implements ContactManager{
 	 */
 	public void flush() {
 		// TODO Auto-generated method stub
-		XStream xstream = new XStream();
-//		xstream.alias("PastMeeting", PastMeetingImpl.class);
-//		xstream.alias("CurrentMeeting", MeetingImpl.class);
-//		xstream.alias("FutureMeeting", FutureMeetingImpl.class);
+		XStream xstream = new XStream(new DomDriver());
+		xstream.alias("PastMeeting", PastMeetingImpl.class);
+		xstream.alias("CurrentMeeting", MeetingImpl.class);
+		xstream.alias("FutureMeeting", FutureMeetingImpl.class);
 		
-//		FlushSchema flushSchema = new FlushSchema();
+		FlushSchema flushSchema = new FlushSchema();
 		
-		String xml = xstream.toXML(PastMeetingImpl.class);
-		System.out.println("Saving xml, " + xml);
+		flushSchema.pastMeetings = this.pastMeetings;
+		flushSchema.currentMeetings = this.currentMeetings;
+		flushSchema.futureMeetings = this.futureMeetings;
+		
+		String xml = xstream.toXML(flushSchema);
+		
+		try {
+			File savexml = new File("contactManager.xml");
+			FileWriter fileWriter = new FileWriter(savexml.getAbsoluteFile());
+			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+			bufferedWriter.write(xml);
+			bufferedWriter.close();
+			System.out.println("Flushed current state into contactManager.xml");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 }
