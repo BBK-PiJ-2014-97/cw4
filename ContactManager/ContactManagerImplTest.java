@@ -187,7 +187,7 @@ public class ContactManagerImplTest {
 		
 		myctm.flush();
 		
-		File testXmlExists = new File("contactManager.xml");
+		File testXmlExists = new File("contacts.xml");
 		assertEquals(true, testXmlExists.exists());
 	}
 	

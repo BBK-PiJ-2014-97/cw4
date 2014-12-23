@@ -23,7 +23,6 @@ public class ContactImpl implements Contact {
 		this.notes = notes;
 	}
 
-
 	public int getId() {
 		return this.id;
 	}

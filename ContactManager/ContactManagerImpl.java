@@ -20,28 +20,13 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 public class ContactManagerImpl implements ContactManager{
 	private List<PastMeetingImpl> pastMeetings = new ArrayList<PastMeetingImpl>();
-	private List<MeetingImpl> currentMeetings = new ArrayList<MeetingImpl>();
 	private List<FutureMeetingImpl> futureMeetings = new ArrayList<FutureMeetingImpl>();
 	
+	// This is the name of the file we will use for XML IO
+	private String fileName = "contacts.xml";
+	
 	public ContactManagerImpl() {
-		// Check if we can find something named contactManager.xmlq
-		File loadFile = new File("contactManager.xml");
-		if(loadFile.exists()) {
-			// Load it up
-			XStream xstream = new XStream(new DomDriver());
-			
-			xstream.alias("PastMeeting", PastMeetingImpl.class);
-			xstream.alias("CurrentMeeting", MeetingImpl.class);
-			xstream.alias("FutureMeeting", FutureMeetingImpl.class);
-			
-			FlushSchema loadedData = (FlushSchema) xstream.fromXML(loadFile);
-			
-			this.pastMeetings    = loadedData.pastMeetings;
-			this.currentMeetings = loadedData.currentMeetings;
-			this.futureMeetings  = loadedData.futureMeetings;
-			
-			System.out.println("Loaded data from XML Dated: " + loadedData.XMLCreationTimestamp);
-		}
+		this.checkState();
 	}
 	
 	public int addFutureMeeting(Set<Contact> contacts, Calendar date) {
@@ -76,7 +61,13 @@ public class ContactManagerImpl implements ContactManager{
 
 	public Meeting getMeeting(int id) {
 		MeetingImpl returnMeeting = null;
-		for(MeetingImpl mt: this.currentMeetings) {
+		for(MeetingImpl mt: this.pastMeetings) {
+			if(mt.getId() == id) {
+				returnMeeting = mt;
+			}
+		}
+
+		for(MeetingImpl mt: this.futureMeetings) {
 			if(mt.getId() == id) {
 				returnMeeting = mt;
 			}
@@ -104,12 +95,6 @@ public class ContactManagerImpl implements ContactManager{
 		List<Meeting> tempMeetings = new ArrayList<Meeting>();
 
 		for(FutureMeetingImpl mt: this.futureMeetings) {
-			if(mt.getDate().equals(date)) {
-				tempMeetings.add((Meeting) mt);
-			}
-		}
-		
-		for(MeetingImpl mt: this.currentMeetings) {
 			if(mt.getDate().equals(date)) {
 				tempMeetings.add((Meeting) mt);
 			}
@@ -168,18 +153,10 @@ public class ContactManagerImpl implements ContactManager{
 	}
 
 	public Set<Contact> getContacts(int... ids) {
-		// We just need to loop through each idea, and then check each of our lists
+		// We just need to loop through each id, and then check each of our lists
 		Set<Contact> contactsToReturn = new HashSet<Contact>();
 		for(int i = 0; i < ids.length; i++){
 			for(FutureMeetingImpl mt: this.futureMeetings) {
-				for(Contact ct: mt.getContacts()) {
-					if(ct.getId() == ids[i]) {
-						contactsToReturn.add(ct);
-					}
-				}
-			}
-			
-			for(MeetingImpl mt: this.currentMeetings) {
 				for(Contact ct: mt.getContacts()) {
 					if(ct.getId() == ids[i]) {
 						contactsToReturn.add(ct);
@@ -209,14 +186,6 @@ public class ContactManagerImpl implements ContactManager{
 			}
 		}
 		
-		for(MeetingImpl mt: this.currentMeetings) {
-			for(Contact ct: mt.getContacts()) {
-				if(ct.getName().contains(name)) {
-					contactsToReturn.add(ct);
-				}
-			}
-		}
-		
 		for(PastMeetingImpl mt: this.pastMeetings) {
 			for(Contact ct: mt.getContacts()) {
 				if(ct.getName().contains(name)) {
@@ -228,32 +197,22 @@ public class ContactManagerImpl implements ContactManager{
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * @see ContactManager#flush()
-	 * File format:XML
-	 * <Calendar>
-	 * 		<Created>
-	 * 		<PastMeetings>
-	 * 		<CurrentMeetings>
-	 * 		<FutureMeetings>
+	 * Save all data into our XML
 	 */
 	public void flush() {
-		// TODO Auto-generated method stub
 		XStream xstream = new XStream(new DomDriver());
 		xstream.alias("PastMeeting", PastMeetingImpl.class);
-		xstream.alias("CurrentMeeting", MeetingImpl.class);
 		xstream.alias("FutureMeeting", FutureMeetingImpl.class);
 		
 		FlushSchema flushSchema = new FlushSchema();
 		
 		flushSchema.pastMeetings = this.pastMeetings;
-		flushSchema.currentMeetings = this.currentMeetings;
 		flushSchema.futureMeetings = this.futureMeetings;
 		
 		String xml = xstream.toXML(flushSchema);
 		
 		try {
-			File savexml = new File("contactManager.xml");
+			File savexml = new File(this.fileName);
 			FileWriter fileWriter = new FileWriter(savexml.getAbsoluteFile());
 			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 			bufferedWriter.write(xml);
@@ -263,6 +222,31 @@ public class ContactManagerImpl implements ContactManager{
 			e.printStackTrace();
 		}
 
+	}
+	
+	/*
+	 * This method will simply check if we can load a previous state
+	 * into memory from an XML file
+	 */
+	public void checkState() {
+		// Check if we can find something resembling our file
+		File loadFile = new File(this.fileName);
+		if(loadFile.exists()) {
+			// Load it up
+			XStream xstream = new XStream(new DomDriver());
+			
+			// Need to do this to prevent loading issues
+			xstream.alias("PastMeeting", PastMeetingImpl.class);
+			xstream.alias("FutureMeeting", FutureMeetingImpl.class);
+			
+			FlushSchema loadedData = (FlushSchema) xstream.fromXML(loadFile);
+			
+			// Assign everything to our local state
+			this.pastMeetings    = loadedData.pastMeetings;
+			this.futureMeetings  = loadedData.futureMeetings;
+			
+			System.out.println("Loaded State: [" + loadedData.XMLCreationTimestamp + "]");
+		}
 	}
 
 }

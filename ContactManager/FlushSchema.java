@@ -15,7 +15,6 @@ import java.util.List;
 public class FlushSchema {
 	public Timestamp XMLCreationTimestamp = null;
 	public List<PastMeetingImpl> pastMeetings = new ArrayList<PastMeetingImpl>();
-	public List<MeetingImpl> currentMeetings = new ArrayList<MeetingImpl>();
 	public List<FutureMeetingImpl> futureMeetings = new ArrayList<FutureMeetingImpl>();
 	
 	FlushSchema() {

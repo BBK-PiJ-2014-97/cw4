@@ -22,6 +22,9 @@ public class MeetingImpl implements Meeting {
 		return this.id;
 	}
 	
+	// Meeting ids are global to this class
+	// so every time a new instance of a Meeting is made
+	// we generate a brand new id and assign it to the instance
 	public int generateId() {
 		int newId = MeetingImpl.globalId++;
 		return newId;
