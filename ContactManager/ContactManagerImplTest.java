@@ -193,6 +193,6 @@ public class ContactManagerImplTest {
 	
 	@Test
 	public void testCanLoadStateFromXMLFile() {
-		
+		ContactManagerImpl myctm = new ContactManagerImpl();
 	}
 }

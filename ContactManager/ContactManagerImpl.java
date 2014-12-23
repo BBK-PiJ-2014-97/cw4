@@ -24,7 +24,24 @@ public class ContactManagerImpl implements ContactManager{
 	private List<FutureMeetingImpl> futureMeetings = new ArrayList<FutureMeetingImpl>();
 	
 	public ContactManagerImpl() {
-		// TODO: load up meetings from our XML
+		// Check if we can find something named contactManager.xmlq
+		File loadFile = new File("contactManager.xml");
+		if(loadFile.exists()) {
+			// Load it up
+			XStream xstream = new XStream(new DomDriver());
+			
+			xstream.alias("PastMeeting", PastMeetingImpl.class);
+			xstream.alias("CurrentMeeting", MeetingImpl.class);
+			xstream.alias("FutureMeeting", FutureMeetingImpl.class);
+			
+			FlushSchema loadedData = (FlushSchema) xstream.fromXML(loadFile);
+			
+			this.pastMeetings    = loadedData.pastMeetings;
+			this.currentMeetings = loadedData.currentMeetings;
+			this.futureMeetings  = loadedData.futureMeetings;
+			
+			System.out.println("Loaded data from XML Dated: " + loadedData.XMLCreationTimestamp);
+		}
 	}
 	
 	public int addFutureMeeting(Set<Contact> contacts, Calendar date) {

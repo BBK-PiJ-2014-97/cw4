@@ -13,13 +13,13 @@ import java.util.List;
  *
  */
 public class FlushSchema {
-	private Timestamp XMLCreationTimestamp = null;
+	public Timestamp XMLCreationTimestamp = null;
 	public List<PastMeetingImpl> pastMeetings = new ArrayList<PastMeetingImpl>();
 	public List<MeetingImpl> currentMeetings = new ArrayList<MeetingImpl>();
 	public List<FutureMeetingImpl> futureMeetings = new ArrayList<FutureMeetingImpl>();
 	
 	FlushSchema() {
-		java.util.Date date= new java.util.Date();
+		java.util.Date date = new java.util.Date();
 		this.XMLCreationTimestamp = new Timestamp(date.getTime());
 	}
 	
