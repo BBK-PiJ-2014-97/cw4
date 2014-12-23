@@ -61,17 +61,12 @@ public class ContactManagerImpl implements ContactManager{
 
 	public Meeting getMeeting(int id) {
 		MeetingImpl returnMeeting = null;
-		for(MeetingImpl mt: this.pastMeetings) {
-			if(mt.getId() == id) {
-				returnMeeting = mt;
-			}
+		
+		returnMeeting = (MeetingImpl) this.getFutureMeeting(id);
+		if(returnMeeting == null) {
+			returnMeeting = (MeetingImpl) this.getPastMeeting(id);
 		}
 
-		for(MeetingImpl mt: this.futureMeetings) {
-			if(mt.getId() == id) {
-				returnMeeting = mt;
-			}
-		}
 		return returnMeeting;
 	}
 	public List<Meeting> getFutureMeetingList(Contact contact) {
