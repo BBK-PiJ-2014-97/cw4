@@ -108,7 +108,9 @@ public class ContactManagerImplTest {
 	
 	@Test
 	public void testCanAddNewContact() {
-		//Waiting for reply from PROF
+		ContactManagerImpl myctm = new ContactManagerImpl();
+		myctm.addNewContact("Mario", "asdasd");
+		assertEquals(1, myctm.contacts.size());
 	}
 	
 	@Test

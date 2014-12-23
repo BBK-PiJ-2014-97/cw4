@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +20,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 public class ContactManagerImpl implements ContactManager{
 	private List<PastMeetingImpl> pastMeetings = new ArrayList<PastMeetingImpl>();
 	private List<FutureMeetingImpl> futureMeetings = new ArrayList<FutureMeetingImpl>();
+	public Set<Contact> contacts = new HashSet<Contact>();
 	
 	// This is the name of the file we will use for XML IO
 	private String fileName = "contacts.xml";
@@ -28,8 +28,17 @@ public class ContactManagerImpl implements ContactManager{
 	public ContactManagerImpl() {
 		this.checkState();
 	}
-	
+
+	/*
+	 * @param contacts	The contacts we would like to add with our meeting
+	 * @param data		The date this meeting will take place
+	 * @see ContactManager#addFutureMeeting(java.util.Set, java.util.Calendar)
+	 */
 	public int addFutureMeeting(Set<Contact> contacts, Calendar date) {
+		if(contacts.isEmpty()) {
+			throw new IllegalArgumentException("Invalid Params provided for ContactManagerImpl.addFutureMeeting");
+		}
+		
 		FutureMeetingImpl newFutureMeeting = new FutureMeetingImpl();
 		newFutureMeeting.setContacts(contacts);
 		newFutureMeeting.setDate(date);
@@ -39,6 +48,10 @@ public class ContactManagerImpl implements ContactManager{
 		return newFutureMeeting.getId();
 	}
 
+	/*
+	 * @param id	Id of the meeting we would like to retrieve
+	 * @see ContactManager#getPastMeeting(int)
+	 */
 	public PastMeeting getPastMeeting(int id) {
 		PastMeetingImpl returnMeeting = null;
 		for(PastMeetingImpl mt: this.pastMeetings) {
@@ -49,7 +62,15 @@ public class ContactManagerImpl implements ContactManager{
 		return returnMeeting;
 	}
 
+	/*
+	 * @param id	Id of the meeting we would like to retrieve
+	 * @see ContactManager#getFutureMeeting(int)
+	 */
 	public FutureMeeting getFutureMeeting(int id) {
+		if(id < 0) {
+			throw new IllegalArgumentException("Invalid Params provided for ContactManagerImpl.getFutureMeeting");
+		}
+		
 		FutureMeetingImpl returnMeeting = null;
 		for(FutureMeetingImpl mt: this.futureMeetings) {
 			if(mt.getId() == id) {
@@ -59,7 +80,15 @@ public class ContactManagerImpl implements ContactManager{
 		return returnMeeting;
 	}
 
+	/*
+	 * @param id	Id of the meeting we would like to retrieve
+	 * @see ContactManager#getMeeting(int)
+	 */
 	public Meeting getMeeting(int id) {
+		if(id < 0) {
+			throw new IllegalArgumentException("Invalid Params provided for ContactManagerImpl.getMeeting");
+		}
+		
 		MeetingImpl returnMeeting = null;
 		
 		returnMeeting = (MeetingImpl) this.getFutureMeeting(id);
@@ -70,18 +99,26 @@ public class ContactManagerImpl implements ContactManager{
 		return returnMeeting;
 	}
 	
+	/*
+	 * @param contact	Contact we would like to check for inside our meetings
+	 * @see ContactManager#getFutureMeetingList(Contact)
+	 */
 	public List<Meeting> getFutureMeetingList(Contact contact) {
 		// Our temp List holding filtered meetings
 		List<Meeting> tempMeetings = new ArrayList<Meeting>();
 		
 		for(FutureMeetingImpl mt: this.futureMeetings) {
-			if(mt.getContacts().contains(contact)) { // Avoid having to do another loop
+			if(mt.getContacts().contains(contact) && !tempMeetings.contains((Meeting) mt)) { // Avoid having to do another loop
 				tempMeetings.add((Meeting) mt);
 			}
 		}
 		return tempMeetings;
 	}
 
+	/*
+	 * @param date	The date we want to check against
+	 * @see ContactManager#getFutureMeetingList(java.util.Calendar)
+	 */
 	public List<Meeting> getFutureMeetingList(Calendar date) {
 		// We must loop through all of the meetings and find those
 		// with the same date as our param
@@ -103,6 +140,10 @@ public class ContactManagerImpl implements ContactManager{
 		return tempMeetings;
 	}
 
+	/*
+	 * @param contact		the Contact we want to check against
+	 * @see ContactManager#getPastMeetingList(Contact)
+	 */
 	public List<PastMeeting> getPastMeetingList(Contact contact) {
 		// Our temp List holding filtered meetings
 		List<PastMeeting> tempMeetings = new ArrayList<PastMeeting>();
@@ -115,6 +156,12 @@ public class ContactManagerImpl implements ContactManager{
 		return tempMeetings;
 	}
 
+	/*
+	 * @param contacts	List of contacts for our new meeting
+	 * @param date		Date our meeting took place
+	 * @param text		Notes describing what happened at the meeting
+	 * @see ContactManager#addNewPastMeeting(java.util.Set, java.util.Calendar, java.lang.String)
+	 */
 	public void addNewPastMeeting(Set<Contact> contacts, Calendar date, String text) {
 		PastMeetingImpl newPastMeeting = new PastMeetingImpl();
 		newPastMeeting.setContacts(contacts);
@@ -124,7 +171,16 @@ public class ContactManagerImpl implements ContactManager{
 		this.pastMeetings.add(newPastMeeting);		
 	}
 
+	/*
+	 * @param id	Id of meeting we would like to modify
+	 * @param text	Notes we would like to add to the meeting
+	 * @see ContactManager#addMeetingNotes(int, java.lang.String)
+	 */
 	public void addMeetingNotes(int id, String text) {
+		if(id < 0 || text.length() < 1) {
+			throw new IllegalArgumentException("Invalid Params provided for ContactManagerImpl.addMeetingNotes");
+		}
+		
 		PastMeetingImpl meeting = (PastMeetingImpl) this.getPastMeeting(id);
 		if(meeting != null) {
 			// Only if we found something we should bother updating notes
@@ -139,11 +195,20 @@ public class ContactManagerImpl implements ContactManager{
 		}
 	}
 
+	/*
+	 * @param name	Name of our new contact
+	 * @param notes	Notes belonging to our new contact
+	 * @see ContactManager#addNewContact(java.lang.String, java.lang.String)
+	 */
 	public void addNewContact(String name, String notes)  {
-		// TODO Auto-generated method stub
-		// Waiting for comments from PROF
+		ContactImpl newContact = new ContactImpl(name, notes);
+		this.contacts.add(newContact);
 	}
 
+	/*
+	 * @param ids	Ids of the contacts we would like to retrieve
+	 * @see ContactManager#getContacts(int[])
+	 */
 	public Set<Contact> getContacts(int... ids) {
 		// We just need to loop through each id, and then check each of our lists
 		Set<Contact> contactsToReturn = new HashSet<Contact>();
@@ -167,6 +232,10 @@ public class ContactManagerImpl implements ContactManager{
 		return contactsToReturn;
 	}
 
+	/*
+	 * @param	name	Name of contact we would like to retrieve
+	 * @see ContactManager#getContacts(java.lang.String)
+	 */
 	public Set<Contact> getContacts(String name) {
 		Set<Contact> contactsToReturn = new HashSet<Contact>();
 		
@@ -189,7 +258,7 @@ public class ContactManagerImpl implements ContactManager{
 	}
 
 	/*
-	 * Save all data into our XML
+	 * @see ContactManager#flush()
 	 */
 	public void flush() {
 		XStream xstream = new XStream(new DomDriver());
@@ -209,7 +278,7 @@ public class ContactManagerImpl implements ContactManager{
 			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 			bufferedWriter.write(xml);
 			bufferedWriter.close();
-			System.out.println("Flushed current state into contactManager.xml");
+			System.out.println("Flushed current state into " + this.fileName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -230,12 +299,14 @@ public class ContactManagerImpl implements ContactManager{
 			// Need to do this to prevent loading issues
 			xstream.alias("PastMeeting", PastMeetingImpl.class);
 			xstream.alias("FutureMeeting", FutureMeetingImpl.class);
+			xstream.alias("Contact", ContactImpl.class);
 			
 			FlushSchema loadedData = (FlushSchema) xstream.fromXML(loadFile);
 			
 			// Assign everything to our local state
 			this.pastMeetings    = loadedData.pastMeetings;
 			this.futureMeetings  = loadedData.futureMeetings;
+			this.contacts	     = loadedData.contacts;
 			
 			System.out.println("Loaded State: [" + loadedData.XMLCreationTimestamp + "]");
 		}

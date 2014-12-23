@@ -1,8 +1,9 @@
 import java.sql.Timestamp;
 import java.util.Date;
- 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 
@@ -16,6 +17,8 @@ public class FlushSchema {
 	public Timestamp XMLCreationTimestamp = null;
 	public List<PastMeetingImpl> pastMeetings = new ArrayList<PastMeetingImpl>();
 	public List<FutureMeetingImpl> futureMeetings = new ArrayList<FutureMeetingImpl>();
+	public Set<Contact> contacts = new HashSet<Contact>();
+	
 	
 	FlushSchema() {
 		java.util.Date date = new java.util.Date();
