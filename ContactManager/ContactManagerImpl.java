@@ -189,6 +189,7 @@ public class ContactManagerImpl implements ContactManager{
 			// Else lets try to find Future meeting and convert it to Past meeting
 			FutureMeetingImpl futureMeeting = (FutureMeetingImpl) this.getFutureMeeting(id);
 			if(futureMeeting != null) {
+				this.futureMeetings.remove(futureMeeting);
 				// we have a match, so lets copy it over
 				this.addNewPastMeeting(futureMeeting.getContacts(), futureMeeting.getDate(), text);
 			}
