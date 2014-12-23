@@ -69,15 +69,14 @@ public class ContactManagerImpl implements ContactManager{
 
 		return returnMeeting;
 	}
+	
 	public List<Meeting> getFutureMeetingList(Contact contact) {
 		// Our temp List holding filtered meetings
 		List<Meeting> tempMeetings = new ArrayList<Meeting>();
 		
 		for(FutureMeetingImpl mt: this.futureMeetings) {
-			for(Contact ct: mt.getContacts()) {
-				if(ct.getName().equals(contact.getName())) {
-					tempMeetings.add((Meeting) mt);
-				}
+			if(mt.getContacts().contains(contact)) { // Avoid having to do another loop
+				tempMeetings.add((Meeting) mt);
 			}
 		}
 		return tempMeetings;
@@ -109,10 +108,8 @@ public class ContactManagerImpl implements ContactManager{
 		List<PastMeeting> tempMeetings = new ArrayList<PastMeeting>();
 		
 		for(PastMeetingImpl mt: this.pastMeetings) {
-			for(Contact ct: mt.getContacts()) {
-				if(ct.getName().equals(contact.getName())) {
-					tempMeetings.add((PastMeeting) mt);
-				}
+			if(mt.getContacts().contains(contact)) { // Avoid having to do another loop
+				tempMeetings.add((PastMeeting) mt);
 			}
 		}
 		return tempMeetings;
